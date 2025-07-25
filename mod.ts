@@ -1,8 +1,8 @@
+import * as path from "@std/path"
+import colors from "ansi-colors"
 import { Hono } from 'hono'
 import * as git from "isomorphic-git"
-import * as path from "@std/path"
 import fs from "node:fs/promises"
-import colors from "ansi-colors"
 
 export type GitLogOptions = {
     root: string
@@ -33,17 +33,17 @@ export class GitLog {
                         formatted = commits.map(({ commit, oid }) => {
                             // Format date similar to git log output
                             const date = new Date(commit.author.timestamp * 1000)
-                            const formattedDate = date.toLocaleDateString('en-US', { 
-                                weekday: 'short', 
-                                month: 'short', 
-                                day: '2-digit', 
-                                hour: '2-digit', 
-                                minute: '2-digit', 
-                                second: '2-digit', 
+                            const formattedDate = date.toLocaleDateString('en-US', {
+                                weekday: 'short',
+                                month: 'short',
+                                day: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: '2-digit',
                                 year: 'numeric',
                                 timeZoneName: 'short'
                             })
-                            
+
                             return [
                                 colors.yellow(`commit ${oid}`),
                                 `Author: ${colors.cyan(commit.author.name)} <${colors.cyan(commit.author.email)}>`,
@@ -78,7 +78,7 @@ export class GitLog {
 
     private getTerminalHTML(repo?: string): string {
         const title = repo ? `Git Log - ${repo}` : 'Git Log'
-        
+
         return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -107,7 +107,7 @@ export class GitLog {
 
     <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
-    
+
     <script>
         let terminal;
         let fitAddon;
@@ -129,13 +129,13 @@ export class GitLog {
                 disableStdin: true,
                 cursorStyle: 'block'
             });
-            
+
             fitAddon = new FitAddon.FitAddon();
             terminal.loadAddon(fitAddon);
-            
+
             terminal.open(document.getElementById('terminal'));
             fitAddon.fit();
-            
+
             window.addEventListener('resize', () => {
                 fitAddon.fit();
             });
@@ -146,19 +146,19 @@ export class GitLog {
                 terminal.writeln('\\x1b[31mError: No repository specified\\x1b[0m');
                 return;
             }
-            
+
             terminal.clear();
             terminal.writeln('\\x1b[36mLoading git log...\\x1b[0m');
-            
+
             try {
                 // Check for oneline query parameter in current URL
                 const urlParams = new URLSearchParams(window.location.search);
                 const isOneline = urlParams.has('oneline');
                 const url = \`/api/\${repo}\${isOneline ? '?oneline' : ''}\`;
-                
+
                 const response = await fetch(url);
                 const text = await response.text();
-                
+
                 terminal.clear();
                 if (response.ok) {
                     // Split the response into lines and write each line separately to preserve formatting
@@ -177,7 +177,7 @@ export class GitLog {
 
         // Initialize terminal when page loads
         initTerminal();
-        
+
         // Load repository if specified
         if (currentRepo) {
             loadRepo(currentRepo);
